@@ -1,7 +1,12 @@
 /*
 TODO:
-1. Get Finger data logging working properly
-2. Get Keylogging data working properly
+- [ ] Get finger data logging working properly
+    - [x] Make the glove easier to wear
+    - [x] Make the glove easier to setup
+    - [ ] Get the glove logging data to file.
+- [ ] Get keylogging data working properly
+- [ ] Collect data fro keylogging and typing
+- [ ] Train a model on the data
 */
 int flexPins[] = {A0, A1, A2, A3, A4};
 int flexValues[] = {0, 0, 0, 0};
