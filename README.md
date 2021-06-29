@@ -1,30 +1,52 @@
-# VVIM - Keyboardless Vim interactions
+# Vvim - Keyboardless Vim interactions
 
 This is done via a hardware glove that the user wears. The glove detects the
 finger's positions and translates them into key presses. It's currently a work
 in progress.
 
+### The glove prototype, with 4 sensors on two fingers
+![](images/glove.jpg)
+
+### Subset of data
+The stream of data from the 4 sensors (here each shown in a different colour)
+has been zeroed so that they all centre around the time when the user pressed
+the 'y' key.
+![](images/y_500ms.png)
+
+
 ## Current Features
-- Glove has been constructed and 
+- Glove prototype has been constructed.
 - Glove can detect finger movements of the right fore finger and right middle
   finger (With space to expand to more fingers if these first two actually
   work)
-- Glove records finger movements via an Arduino Uno and sends them to serial
-  output.
-- Keylogger is installed on the developer's machine, and logs key presses to a
-  file along with Unix milliseconds since epoch
+    - This corresponds to the following keys: `b`, `h`, `i`, `j`, `k`, `m`,
+      `n`, `u`, `y`.
+- Glove records finger movements via an Arduino script `vvim.ino` on an Uno,
+  and sends them to serial output.
+- Serial output is read by the python script `glove_logger.py` and saved to the
+  file `glove.log` along with the Unix milliseconds since epoch.
+- A keylogger is installed on the developer's machine, and logs key presses to
+  the file `keys.log` along with Unix milliseconds since epoch.
+- Running `cleanup.sh` cleans up the data from the keylogger and the serial
+  output into one file named `sorted.log`.
+- The file `eda.py` saves plots to `plots/` such as:
+
+![](plots/y_500ms.png)
+
+![](plots/h_500ms.png)
+
 
 ## In Progress
-- Capture the glove output from serial and save it to file (along with the
-  timestamp)
+- Use the collected data to train a prediction model for just the two fingers
+- Expand to collect more data from more fingers.
+- If flex sensors aren't enough to predict exactly when a key is pressed, add
+  force sensors to the fingertips.
 
 ## To Do
 - Use an Arduino Nano instead of an Uno, and host the entire thing on the
   user's hand
 - Connect the glove to the computer via Bluetooth, instead of a wired
   connection
-- Collect lots of key presses and finger movements
-    - Use the collected data to train a prediction model
 
 
 ## How to Start Recording Data
