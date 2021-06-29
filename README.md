@@ -64,6 +64,15 @@ like `h` are pressed compared to when a `j` is pressed
 
 
 ## How to Start Recording Data
+Probably best to do this all in `tmux` since handling multiple terminal windows
+is a pain otherwise. A keylogger (I use [Casey Scarborough's
+keylogger](https://github.com/caseyscarborough/keylogger)) is also required.
+
+0. Install requirements
+``` 
+pip3 install -r requirements.txt
+```
+
 1. Run the command to clear the logfile:
 ``` 
 sudo keylogger clear
@@ -71,28 +80,33 @@ sudo keylogger clear
 
 2. Start the keylogger:
 ``` 
-sudo keylogger
+sudo keylogger ./keys.log
 ```
-
 
 3. Start recording glove movements:
 ``` 
-# This hasn't been figured out yet, but the follwing
-#  command will use `screen` to view the serial output:
-screen /dev/cu.usbmodem141101 9600
-``
+python3 glove_logger.py
+```
 
 4. Put the glove on, and start typing things out. They keystrokes and finger
    movements will be recorded separately
 
-5. Remove the glove, 
+5. Remove the glove
 
-6. Stop recording the finger movements
+6. Stop the keylogger with `CTRL-C`
 
-7. Stop the keylogger with `CTRL-C`:
+7. Stop recording the finger movements with `CTRL-C`
 
-8. And you're done. The data will be stored until you start recording again.
+8. Now the data is recorded, clean it up:
+```
+./cleanup.sh
+```
 
+9. And analyse the data with `eda.py`
+```
+python3 eda.py
+```
+The images will be stored to `plots/` for your viewing pleasure
 
 # License
 This work is licensed under GNU GPLv3. See the attached LICENSE. See
