@@ -57,3 +57,9 @@ screen /dev/cu.usbmodem141101 9600
 
 8. And you're done. The data will be stored until you start recording again.
 
+
+# License
+This work is licensed under GNU GPLv3. See the attached LICENSE. See
+https://choosealicense.com/licenses/gpl-3.0/# for a non-legalese explanation of
+the license.
+
