@@ -31,8 +31,22 @@ the 'y' key.
   output into one file named `sorted.log`.
 - The file `eda.py` saves plots to `plots/` such as:
 
-![](plots/y_500ms.png)
+## Sensor data 
+Each colour is a differently positioned sensor. Each line is one stream of data
+recorded by a sensor. The streams have each been zeroed so that every instance
+of pressing a certain key is centred.
+![](plots/u_500ms.png)
+#### Keys on the home row
+Some keys are easier to spot, and others less so as my fingers move a lot when
+pressing a `y` compared to a `k` just because of where the keys are positioned
+on the keyboard.
+![](plots/k_500ms.png)
 
+#### More or less data
+The data has not been normalised, so there's far more data for when common keys
+like `h` are pressed compared to when a `j` is pressed
+![](plots/j_500ms.png)
+![](plots/m_500ms.png)
 ![](plots/h_500ms.png)
 
 
