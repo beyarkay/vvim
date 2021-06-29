@@ -29,9 +29,14 @@ the 'y' key.
   the file `keys.log` along with Unix milliseconds since epoch.
 - Running `cleanup.sh` cleans up the data from the keylogger and the serial
   output into one file named `sorted.log`.
+- A Gradient Boosted tree has been trained and saved to `model.pkl`. Currently
+  it has a test accuracy of 79.7%.
+    - This will hopefully be improved as more data is gathered, as currently
+      there are only 587 keypresses on which to train 9 categories, or about 
+      65 examples per category which is not enough.
 - The file `eda.py` saves plots to `plots/` such as:
 
-## Sensor data 
+## Graphs
 Each colour is a differently positioned sensor. Each line is one stream of data
 recorded by a sensor. The streams have each been zeroed so that every instance
 of pressing a certain key is centred.
@@ -51,12 +56,13 @@ like `h` are pressed compared to when a `j` is pressed
 
 
 ## In Progress
-- Use the collected data to train a prediction model for just the two fingers
-- Expand to collect more data from more fingers.
-- If flex sensors aren't enough to predict exactly when a key is pressed, add
-  force sensors to the fingertips.
+- Currently there are only about 600 keypresses recorded. Record more examples
+  of typing and add more sensors to the fingers so that fewer keystrokes have
+  to be typed in order to get the data.
 
 ## To Do
+- If flex sensors aren't enough to predict exactly when a key is pressed, add
+  force sensors to the fingertips.
 - Use an Arduino Nano instead of an Uno, and host the entire thing on the
   user's hand
 - Connect the glove to the computer via Bluetooth, instead of a wired

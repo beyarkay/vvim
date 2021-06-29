@@ -97,11 +97,22 @@ params = {
 
 
 
-grad_boost_classif_grid = GridSearchCV( GradientBoostingClassifier(random_state=1), param_grid=params, n_jobs=-1, cv=3, verbose=5)
-grad_boost_classif_grid.fit(X_train,Y_train)
+# grad_boost_classif_grid = GridSearchCV( GradientBoostingClassifier(random_state=1), param_grid=params, n_jobs=-1, cv=3, verbose=5)
+# grad_boost_classif_grid.fit(X_train,Y_train)
 
-print('Train Accuracy : %.3f'%grad_boost_classif_grid.best_estimator_.score(X_train, Y_train))
-print('Test Accuracy : %.3f'%grad_boost_classif_grid.best_estimator_.score(X_test, Y_test))
-print('Best Accuracy Through Grid Search : %.3f'%grad_boost_classif_grid.best_score_)
-print('Best Parameters : ',grad_boost_classif_grid.best_params_)
+# print('Train Accuracy : %.3f'%grad_boost_classif_grid.best_estimator_.score(X_train, Y_train))
+# print('Test Accuracy : %.3f'%grad_boost_classif_grid.best_estimator_.score(X_test, Y_test))
+# print('Best Accuracy Through Grid Search : %.3f'%grad_boost_classif_grid.best_score_)
+# print('Best Parameters : ',grad_boost_classif_grid.best_params_)
+
+
+best = GradientBoostingClassifier(random_state=1, criterion='friedman_mse', max_depth=2, max_features=0.5, min_samples_leaf=16, min_samples_split=0.5, n_estimators=400, verbose=1)
+best.fit(X_train,Y_train)
+print('Train Accuracy : %.3f'%best.score(X_train, Y_train))
+print('Test Accuracy : %.3f'%best.score(X_test, Y_test))
+
+import pickle
+with open('model.pkl','wb') as f:
+        pickle.dump(best,f)
+
 
