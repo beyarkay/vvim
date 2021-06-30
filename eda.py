@@ -9,7 +9,13 @@ sns.set()
 print("done")
 
 # These are the characters actually covered by the sensors
-COVERAGE = list('bhijkmnuy')
+# Finger notation is that as for piano. 5 is pinky, though to 1 for thumb
+r1 = ["space"]
+r2 = ["j", "m", "n", "b", "h", "y"]
+r3 = [ "k", "y", "u", "i", "<", "(", "[" ]
+r4 = ["l", ":", "[del]", "1", "o", "p", ">", ")", "]", "0", "_", "-", "+", "=", ",", "."]
+r5 = [";", "[return]", "/", "?"]
+COVERAGE = list(set(r2 + r3))
 def preprocess():
     print("Preprocessing the data...", end="")
     # Read in data from tsv

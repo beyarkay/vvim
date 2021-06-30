@@ -6,6 +6,18 @@ import pandas as pd
 import numpy as np
 import datetime
 
+# =========
+# Constants
+# =========
+
+# These are the characters actually covered by the sensors
+# Finger notation is that as for piano. 5 is pinky, though to 1 for thumb
+r1 = ["space"]
+r2 = ["j", "m", "n", "b", "h", "y"]
+r3 = [ "k", "y", "u", "i", "<", "(", "[" ]
+r4 = ["l", ":", "[del]", "1", "o", "p", ">", ")", "]", "0", "_", "-", "+", "=", ",", "."]
+r5 = [";", "[return]", "/", "?"]
+COVERAGE = list(set(r2 + r3))
 # ======================
 # Preprocessing the data
 # ======================
@@ -43,7 +55,6 @@ keys.sort_values('datetime', inplace=True)
 # Remove all keys that don't have at least NUM_SAMPLES values before them
 sensors_start = sensors['datetime'].min() + datetime.timedelta(microseconds=DURATION_US)
 sensors_end = sensors['datetime'].max()
-COVERAGE = list('bhijkmnuy')
 keys = keys[(keys['datetime'].between(sensors_start, sensors_end)) & (keys['value'].isin(COVERAGE))]
 
 def extract_sensor_data(row):
