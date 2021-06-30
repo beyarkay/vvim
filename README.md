@@ -32,10 +32,12 @@ the 'y' key.
 - Running `cleanup.sh` cleans up the data from the keylogger and the serial
   output into one file named `sorted.log`.
 - A Gradient Boosted tree has been trained and saved to `model.pkl`. Currently
-  it has a test accuracy of 79.7%.
-    - This will hopefully be improved as more data is gathered, as currently
-      there are only 587 keypresses on which to train 9 categories, or about 
-      65 examples per category which is not enough.
+  it has a Training Accuracy of 0.986 and a Test Accuracy of 0.813:
+    - Currently there are 2883 key press examples in the dataset, as only the
+      following keys are counted: `j`, `m`, `n`, `b`, `h`, `y`, `k`, `y`, `u`,
+      `i`
+    - Adding more sensors will mean that more keystrokes can be tracked, and so
+      more training data can be gained from less manual typing
 - The file `eda.py` saves plots to `plots/` such as:
 
 ## Graphs
