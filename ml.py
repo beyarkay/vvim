@@ -6,6 +6,10 @@ import pandas as pd
 import numpy as np
 import datetime
 
+# ======================
+# Preprocessing the data
+# ======================
+
 print("Preprocessing the data...", end="")
 # Read in data from tsv
 df = pd.read_csv("sorted.log", "\t", names=['micros', 'sensor', 'value'])    
@@ -27,8 +31,9 @@ sensors_end = sensors['datetime'].max()
 keys = df[(df['sensor'] == 0) & (df['datetime'].between(sensors_start, sensors_end))]
 print("done")
 
-digits = load_digits()
-X_digits, Y_digits = digits.data, digits.target
+# ======================
+# Load in the glove data
+# ======================
 
 NUM_SAMPLES = 4*16          # Multiply by 4 because there are 4 sensors
 DURATION_US = 500_000
@@ -57,16 +62,8 @@ all_data.rename(columns={0:'value', 1:'datetime'}, inplace=True)
 y_data = np.array(all_data['value'])
 X_data = np.array(all_data.loc[:, range(2, NUM_SAMPLES+2)])
 
-print('Dataset Size : ',X_digits.shape, Y_digits.shape)
 print('Dataset Size : ',X_data.shape, y_data.shape)
 
-#X_train, X_test, Y_train, Y_test = train_test_split(
-#    X_digits,
-#    Y_digits,
-#    train_size=0.80,
-#    test_size=0.20,
-#    random_state=123
-#)
 X_train, X_test, Y_train, Y_test = train_test_split( X_data, y_data, train_size=0.80, test_size=0.20, random_state=123)
 print('Train/Test Sizes : ', X_train.shape, X_test.shape, Y_train.shape, Y_test.shape)
 

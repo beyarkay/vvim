@@ -67,7 +67,36 @@ like `h` are pressed compared to when a `j` is pressed
   user's hand
 - Connect the glove to the computer via Bluetooth, instead of a wired
   connection
+- Current models don't have the option of categorizing an sequence of sensor
+  readings as not pressing any key at all. This should be fixed so the model
+  isn't constantly assuming at least one key is being pressed
+    - This could be done easily with pressure sensors
+- Write some sort of visualiser to live track sensor data, actual key presses,
+  and predicted key presses
 
+## Keys and which finger tends to press them
+Note that this list is likely very specific to the author, as different people
+will type differently. I think I probably use my right ring finger much more
+than I really should. Also I type a `y` with my index finger for words like
+`type` or `you` (where I subsequently have to type another letter with me right
+hand), but I type it with my middle finger for words like `yes`, `yank`, or
+`keyboard`.
+
+- Right Hand
+    - Thumb: `space`
+    - Index: `j`, `m`, `n`, `b`, `h`, `y`
+    - Middle: `k`, `y`, `u`, `i`, `<`, `(`, `[`
+    - Ring: `l`, `:`, `BACKSPACE`, `o`, `p`, `>`, `)`, `]`, `0`, `_`, `-`, `+`, `=`
+    - Pinky: `;`, `ENTER`, `/`, `?`
+- Left Hand (Incomplete as I've not yet built a glove for the left hand)
+    - Pinky: 
+    - Ring:
+    - Middle: 
+    - Index: 
+    - Thumb: 
+
+Here's a picture of my keyboard for reference:
+![](images/keyboard.jpg)
 
 ## How to Start Recording Data
 Probably best to do this all in `tmux` since handling multiple terminal windows
@@ -114,7 +143,7 @@ python3 eda.py
 ```
 The images will be stored to `plots/` for your viewing pleasure
 
-# License
+## License
 This work is licensed under GNU GPLv3. See the attached LICENSE. See
 https://choosealicense.com/licenses/gpl-3.0/# for a non-legalese explanation of
 the license.
