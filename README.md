@@ -19,8 +19,10 @@ the 'y' key.
 - Glove can detect finger movements of the right fore finger and right middle
   finger (With space to expand to more fingers if these first two actually
   work)
-    - This corresponds to the following keys: `b`, `h`, `i`, `j`, `k`, `m`,
-      `n`, `u`, `y`.
+    - This corresponds to the following keys, shown with how often those keys
+      show up in the current dataset: `h`: 628, `u`: 291, `y`: 171, `m`: 171,
+      `b`: 155, `k`: 120, `j`:  21, 
+
 - Glove records finger movements via an Arduino script `vvim.ino` on an Uno,
   and sends them to serial output.
 - Serial output is read by the python script `glove_logger.py` and saved to the
@@ -37,6 +39,7 @@ the 'y' key.
 - The file `eda.py` saves plots to `plots/` such as:
 
 ## Graphs
+
 Each colour is a differently positioned sensor. Each line is one stream of data
 recorded by a sensor. The streams have each been zeroed so that every instance
 of pressing a certain key is centred.
@@ -85,8 +88,8 @@ hand), but I type it with my middle finger for words like `yes`, `yank`, or
 - Right Hand
     - Thumb: `space`
     - Index: `j`, `m`, `n`, `b`, `h`, `y`
-    - Middle: `k`, `y`, `u`, `i`, `<`, `(`, `[`
-    - Ring: `l`, `:`, `BACKSPACE`, `o`, `p`, `>`, `)`, `]`, `0`, `_`, `-`, `+`, `=`
+    - Middle: `k`, `y`, `u`, `i`, `<`, `(`, `[` 
+    - Ring: `l`, `:`, `BACKSPACE`, `o`, `p`, `>`, `)`, `]`, `0`, `_`, `-`, `+`, `=`, `,`, `.`
     - Pinky: `;`, `ENTER`, `/`, `?`
 - Left Hand (Incomplete as I've not yet built a glove for the left hand)
     - Pinky: 
@@ -123,8 +126,12 @@ sudo keylogger ./keys.log
 python3 glove_logger.py
 ```
 
-4. Put the glove on, and start typing things out. They keystrokes and finger
-   movements will be recorded separately
+4. Put the glove on, and start typing things out. I usually do this by opening
+   a text file (like Alice in Wonderland available on Gutenberg) in vim (`vim
+   alice.txt`), and then splitting the window vertically (`:vsp`), and then
+   opening a temporary file in which to type in (`:e tmp`). Finally, type
+   (`:set cursorbind`) into both frames so that the source text scrolls as you
+   type it.  They keystrokes and finger movements will be recorded separately
 
 5. Remove the glove
 
