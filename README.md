@@ -5,6 +5,9 @@ finger's positions and translates them into key presses. It's currently a work
 in progress.
 
 ### The glove prototype, with 4 sensors on two fingers
+Note that the next version is in progress, with 13 sensors per hand:
+- 2 flex sensors per finger, 1 force sensor on the fingertip, and one force
+  sensor on the thumb
 ![](images/glove.jpg)
 
 ### Subset of data
@@ -38,6 +41,7 @@ the 'y' key.
       `i`
     - Adding more sensors will mean that more keystrokes can be tracked, and so
       more training data can be gained from less manual typing
+- Each finger has 2 sensors, with space to add an additional sensor per finger
 - The file `eda.py` saves plots to `plots/` such as:
 
 ## Graphs
@@ -61,17 +65,27 @@ like `h` are pressed compared to when a `j` is pressed
 
 
 ## In Progress
-- Currently there are only about 600 keypresses recorded. Record more examples
-  of typing and add more sensors to the fingers so that fewer keystrokes have
-  to be typed in order to get the data.
+- 3D print a glove to hold everything:
+    - This will keep the sensors in place better, resulting in more accurate
+      finger measurements
+    - If designed properly, it should be less cumbersome to type with than the
+      glove
+    - The fingertips should be open, as it's tricky to type properly when my
+      fingertips can't feel the keys.
+    - This should allow for easier expansion into using more sensors
+    - Definitely needs to have space for the force sensors
 
 ## To Do
+- Add a category to allow the glove to predict that no key is being pressed.
 - If flex sensors aren't enough to predict exactly when a key is pressed, add
   force sensors to the fingertips.
-- Use an Arduino Nano instead of an Uno, and host the entire thing on the
-  user's hand
-- Connect the glove to the computer via Bluetooth, instead of a wired
-  connection
+- Experiment to see if you _really_ need two sensors per finger, or if you can
+  get away with just 1 for some fingers
+- Use an Arduino Nano 3.3v BLE because:
+    - Small enough to have one on each hand
+    - Can connect via BlueTooth instead of via wires
+    - They also contain an IMU, so hand acceleration can be measured which will
+      improve accuracy for keys further from the home row.
 - Current models don't have the option of categorizing an sequence of sensor
   readings as not pressing any key at all. This should be fixed so the model
   isn't constantly assuming at least one key is being pressed
