@@ -1,38 +1,36 @@
 /*
-TODO:
-- [ ] Get finger data logging working properly
-    - [x] Make the glove easier to wear
-    - [x] Make the glove easier to setup
-    - [ ] Get the glove logging data to file.
-- [ ] Get keylogging data working properly
-- [ ] Collect data fro keylogging and typing
-- [ ] Train a model on the data
-*/
-int flexPins[] = {A0, A1, A2, A3, A4};
-int flexValues[] = {0, 0, 0, 0};
-int offsets[] =    {0, 0, 0, 0};
-int numFlexSensors = 4;
-//int flexPins[] = {A0};
-//int flexValues[] = {0};
-//int offsets[] =    {0};
-//int numFlexSensors = 1;
+   Documentation for Mux.h: https://github.com/stechio/arduino-ad-mux-lib
+ */
+
+#include <Mux.h>
+using namespace admux;
+
+int numSensors = 13;
+int data[13];
+// 16-channel Mux declared with analog input signal on pin A0 and channel
+// control on digital pins 8, 9, 10 and 11.
+Mux mux(Pin(A0, INPUT, PinType::Analog), Pinset(8, 9, 10, 11));
+
 
 void setup() {
-    // put your setup code here, to run once:
+    // Use a high baud rate so that the sensor readings are more accurate.
     Serial.begin(57600);
-    for (int i = 0; i < numFlexSensors; i++) {
-        pinMode(flexPins[i], INPUT);
-    }
 }
 
 void loop() {
-    // put your main code here, to run repeatedly:
-    for (int i = 0; i < numFlexSensors - 1; i++) {
-        flexValues[i] = analogRead(flexPins[i]);
-        Serial.print(flexValues[i]);
+    // Read each sensor value from the multiplexor.
+    for (int i = 0; i < numSensors; i++) {
+        if (i % 3 == 0) {
+            // All of 0,3,6,9,12 are used for force sensors, which aren't
+            // currently implemented. Just print 0 to keep the indexes correct.
+            Serial.print("0, ");
+            continue;
+        }
+        mux.channel(i);
+        data[i] = mux.read();
+        Serial.print(data[i]);
         Serial.print(", ");
+        delay(1);
     }
-    flexValues[numFlexSensors - 1] = analogRead(flexPins[numFlexSensors - 1]);
-    Serial.println(flexValues[numFlexSensors - 1]);
-    delay(10);
+    Serial.println("");
 }
