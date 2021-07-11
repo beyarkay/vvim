@@ -4,11 +4,12 @@ This is done via a hardware glove that the user wears. The glove detects the
 finger's positions and translates them into key presses. It's currently a work
 in progress.
 
-### The glove prototype, with 4 sensors on two fingers
-Note that the next version is in progress, with 13 sensors per hand:
-- 2 flex sensors per finger, 1 force sensor on the fingertip, and one force
-  sensor on the thumb
-![](images/glove.jpg)
+### The fully 3D printed glove
+The glove is custom designed and completely 3D printed.
+![](images/glove_V1.jpg)
+And an image from the side, showing how the flex sensors feed through each of
+the finger brackets.
+![](images/glove_V1_side.jpg)
 
 ### Subset of data
 The stream of data from the 4 sensors (here each shown in a different colour)
