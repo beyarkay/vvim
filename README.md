@@ -65,6 +65,15 @@ like `h` are pressed compared to when a `j` is pressed
 
 
 ## In Progress
+- Write some sort of visualiser to live track sensor data, actual key presses,
+  and predicted key presses. Visualiser should:
+    - `tail` the `keys.log` keys.log file and the `glove_measurements.log`
+      file, so that the serial USB communication isn't blocked
+    - Draw graphs of the sensor data live, displaying the past `n` seconds of
+      historical data
+    - Use the keylogging data to annotate when the actual key presses are.
+    - Some sort of visualisation of what the model (as saved under `model.pkl`)
+      is predicting for the current sensor values.
 - 3D print a glove to hold everything:
     - This will keep the sensors in place better, resulting in more accurate
       finger measurements
@@ -90,8 +99,6 @@ like `h` are pressed compared to when a `j` is pressed
   readings as not pressing any key at all. This should be fixed so the model
   isn't constantly assuming at least one key is being pressed
     - This could be done easily with pressure sensors
-- Write some sort of visualiser to live track sensor data, actual key presses,
-  and predicted key presses
 
 ## Keys and which finger tends to press them
 Note that this list is likely very specific to the author, as different people
