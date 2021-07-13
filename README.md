@@ -7,19 +7,35 @@ in progress.
 ### The fully 3D printed glove
 The glove is custom designed and completely 3D printed.
 ![](images/glove_V1.jpg)
+
 And an image from the side, showing how the flex sensors feed through each of
 the finger brackets.
 ![](images/glove_V1_side.jpg)
 
-### Subset of data
-The stream of data from the 4 sensors (here each shown in a different colour)
-has been zeroed so that they all centre around the time when the user pressed
-the 'y' key.
-![](images/y_500ms.png)
+### Graphs of the sensor readings
+As the user's hand moves, the 8 sensors(positioned over the knuckles of the
+four fingers) pick up this movement and feed it back to the computer. These
+graphs show those sensor data, with the sensor closest to the wrist's labelled
+`right-<FINGER_NAME>-1` and the sensors closest to the fingertip labelled
+`right-<FINGER_NAME>-2`. For example, `right-pinky-2` or `right-middle-1`.
+
+
+#### All sensors 500ms before and after pressing the `RETURN` key
+![](images/return_500ms.png)
+
+#### All sensors 500ms before and after pressing the `DEL` key
+![](images/del_500ms.png)
+
+#### All sensors 500ms before and after pressing the `u` key
+![](images/u_500ms.png)
+
+#### All sensors 500ms before and after pressing the `i` key
+![](images/i_500ms.png)
 
 
 ## Current Features
-- Glove prototype has been constructed.
+- A fully 3D printed glove containing 8 sensors (2 per finger)
+
 - Glove can detect finger movements of the right fore finger and right middle
   finger (With space to expand to more fingers if these first two actually
   work)
@@ -36,12 +52,8 @@ the 'y' key.
 - Running `cleanup.sh` cleans up the data from the keylogger and the serial
   output into one file named `sorted.log`.
 - A Gradient Boosted tree has been trained and saved to `model.pkl`. Currently
-  it has a Training Accuracy of 0.986 and a Test Accuracy of 0.813:
-    - Currently there are 2883 key press examples in the dataset, as only the
-      following keys are counted: `j`, `m`, `n`, `b`, `h`, `y`, `k`, `y`, `u`,
-      `i`
-    - Adding more sensors will mean that more keystrokes can be tracked, and so
-      more training data can be gained from less manual typing
+  it has a Training Accuracy of 0.986 and a Test Accuracy of 0.813. A LSTM will
+  likely perform better.
 - Each finger has 2 sensors, with space to add an additional sensor per finger
 - The file `eda.py` saves plots to `plots/` such as:
 
@@ -66,6 +78,11 @@ like `h` are pressed compared to when a `j` is pressed
 
 
 ## In Progress
+- Replace the two broken sensors
+- Add a category to allow the glove to predict that no key is being pressed.
+- (Re)train the ML model
+
+## To Do
 - Write some sort of visualiser to live track sensor data, actual key presses,
   and predicted key presses. Visualiser should:
     - `tail` the `keys.log` keys.log file and the `glove_measurements.log`
@@ -75,18 +92,6 @@ like `h` are pressed compared to when a `j` is pressed
     - Use the keylogging data to annotate when the actual key presses are.
     - Some sort of visualisation of what the model (as saved under `model.pkl`)
       is predicting for the current sensor values.
-- 3D print a glove to hold everything:
-    - This will keep the sensors in place better, resulting in more accurate
-      finger measurements
-    - If designed properly, it should be less cumbersome to type with than the
-      glove
-    - The fingertips should be open, as it's tricky to type properly when my
-      fingertips can't feel the keys.
-    - This should allow for easier expansion into using more sensors
-    - Definitely needs to have space for the force sensors
-
-## To Do
-- Add a category to allow the glove to predict that no key is being pressed.
 - If flex sensors aren't enough to predict exactly when a key is pressed, add
   force sensors to the fingertips.
 - Experiment to see if you _really_ need two sensors per finger, or if you can
