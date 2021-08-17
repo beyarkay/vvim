@@ -20,6 +20,12 @@ graphs show those sensor data, with the sensor closest to the wrist's labelled
 `right-<FINGER_NAME>-2`. For example, `right-pinky-2` or `right-middle-1`.
 
 
+#### All sensor readings over a 1 minute long arbitrarily chosen interval
+![](images/1min_all_sensors.png)
+
+#### All sensor readings over a 5 second long arbitrarily chosen interval
+![](images/5sec_all_sensors.png)
+
 #### All sensors 500ms before and after pressing the `RETURN` key
 ![](images/return_500ms.png)
 
@@ -31,6 +37,17 @@ graphs show those sensor data, with the sensor closest to the wrist's labelled
 
 #### All sensors 500ms before and after pressing the `i` key
 ![](images/i_500ms.png)
+
+#### A small-multiples plot of average sensor data for common keys
+This set of graphs might need some explaining, but is very informative.  There
+are 8 graphs in total, one for each finger. The x-axis on each of those graphs
+depicts the sensor readings (in arbitrary units) and each of those graphs has
+10 box-and-whisker-plots oriented horizontally, corresponding to the 10 most
+frequently pressed keys in the dataset (`[return]`, `l`, `i`, `m`, `n`,
+`[del]`, `u`, `h`, `o`, `k`).
+![](images/boxenplot.png)
+From this you can see that each key has a unique set of average sensor readings
+at the moment it is pressed.
 
 
 ## Current Features
