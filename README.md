@@ -83,6 +83,11 @@ like `h` are pressed compared to when a `j` is pressed
 - (Re)train the ML model
 
 ## To Do
+- replace the costly flex sensors with an in-house version.
+    - Maybe have wires connected from base to fingertip, and we measure how
+      much that wire is paid out as the finger flexs?
+- Need a visualiser to see exactly what is happening with every sensor around
+  certain time points
 - Write some sort of visualiser to live track sensor data, actual key presses,
   and predicted key presses. Visualiser should:
     - `tail` the `keys.log` keys.log file and the `glove_measurements.log`
