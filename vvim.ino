@@ -30,7 +30,7 @@ void loop() {
         data[i] = mux.read();
         Serial.print(data[i]);
         Serial.print(", ");
-        delay(1);
+        delay(2);
     }
     Serial.println("");
 }
