@@ -1,4 +1,7 @@
 print("Imports...", end="")
+import seaborn as sns
+sns.set()
+import matplotlib.pyplot as plt
 import pandas as pd
 import datetime
 pd.set_option('display.max_columns', None)
