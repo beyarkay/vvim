@@ -95,14 +95,21 @@ like `h` are pressed compared to when a `j` is pressed
 
 
 ## In Progress
-- Replace the two broken sensors
 - Add a category to allow the glove to predict that no key is being pressed.
 - (Re)train the ML model
 
 ## To Do
+- Figure out some way of doing a residual analysis on any model so you can see
+  where it's going wrong and what feature engineering you need to do.
+- plot the predictions as a polar graph so that you can better distinguish the
+  shape of each key. So the different sensors are mapped to theta, the flex is
+  mapped to r and maybe time is mapped to a segment within each sensor's little
+  slice of theta? That or just keep theta the same over time and change the
+  color of the point being plotted.
 - replace the costly flex sensors with an in-house version.
     - Maybe have wires connected from base to fingertip, and we measure how
       much that wire is paid out as the finger flexs?
+    - Maybe use IMU sensors instead?
 - Need a visualiser to see exactly what is happening with every sensor around
   certain time points
 - Write some sort of visualiser to live track sensor data, actual key presses,
