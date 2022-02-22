@@ -1,156 +1,89 @@
 print("Imports...", end="")
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
 import seaborn as sns
 import datetime
-pd.set_option('display.max_columns', None)
+import json
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import numpy as np 
+import os
+import pandas as pd
 sns.set()
-sns.set_style("darkgrid")
+pd.set_option('display.max_columns', None)
+pd.set_option('display.max_rows', 50)
 print("done")
 
-# These are the characters actually covered by the sensors
-# Finger notation is that as for piano. 5 is pinky, though to 1 for thumb
-r1 = ["space"]
-r2 = ["j", "m", "n", "b", "h", "y"]
-r3 = [ "k", "y", "u", "i", "<", "(", "[" ]
-r4 = ["l", ":", "[del]", "1", "o", "p", ">", ")", "]", "0", "_", "-", "+", "=", ",", "."]
-r5 = [";", "[return]", "/", "?"]
-COVERAGE = list(set(r2 + r3 + r4 + r5))
-# Note that the arduino is zero indexed, but the python script has to be
-# one-indexed as the zero-th 'sensor' is the string indicating which key was
-# pressed
-SENSORS_IN_USE = ["0", "2", "3", "5", "6", "8", "9", "11", "12"]
-SENSOR_ORDER = ["right-index-1",
-    "right-index-2",
-    "right-middle-1",
-    "right-middle-2",
-    "right-ring-1",
-    "right-ring-2",
-    "right-pinky-1",
-    "right-pinky-2",
-]
-SENSOR_DESCRIPTIONS = {
-    0: "kbd",
-    1: "right-thumb-3",
-    2: "right-index-1",
-    3: "right-index-2",
-    4: "right-index-3",
-    5: "right-middle-1",
-    6: "right-middle-2",
-    7: "right-middle-3",
-    8: "right-ring-1",
-    9: "right-ring-2",
-    10: "right-ring-3",
-    11: "right-pinky-1",
-    12: "right-pinky-2",
-    13: "right-pinky-3",
-}
-def preprocess():
-    print("Preprocessing data from sorted.log")
-    # Read in data from tsv
-    df = pd.read_csv("sorted.log", "\t", names=['micros', 'sensor', 'value'])    
+# Load in some parameters constant across the various scripts
+with open('params.json', 'r') as f:
+    params = json.load(f)
 
-    # Convert micros since epoch to datetime, 
-    df['datetime'] = pd.to_datetime(df['micros'], unit='us')
-    # Remove the irrelevant micros column
-    del df['micros']
-    # df['sensor'] = pd.to_numeric(df['sensor'])
-    
-    # Drop all the sensors we're not using
-    df = df[df['sensor'].isin(SENSORS_IN_USE)]
-    # Rename the sensors from indices to names
-    df[['sensor']] = df[['sensor']].replace(to_replace=SENSOR_DESCRIPTIONS)
-    print(df.head())
-    # Describe the df so far
-    print(df.describe(datetime_is_numeric=True))
-    # Store the key presses separately from the sensor value readings
-    sensors = df.loc[df['sensor'] != 'kbd']
-    # The sensor's values are all numerical data readings
-    sensors['value'] = pd.to_numeric(sensors['value'])
-    ## Normalise the sensor values to have zero mean and unit variance
-    #gb = sensors.groupby('sensor').describe()['value'][['mean', 'std']]
-    #def zero_mean_unit_variance(row):
-    #    if row['sensor'] == 'kbd':
-    #        return row['value']
-    #    else:
-    #        s = pd.to_numeric(row['sensor'])
-    #        return (pd.to_numeric(row['value']) -  gb.loc[s, 'mean']) / gb.loc[s, 'std']
-    #df['value'] = df.apply(zero_mean_unit_variance, axis='columns')
-    #sensors = df[df['sensor'] != 'kbd']
-    #sensors['value'] = pd.to_numeric(sensors['value'])
+typeable = []
+for v in params.get('fingers-to-keys').values():
+    typeable.extend(v)
 
-    # Only keep keypresses that we've got sensor data for
-    sensors_start = sensors['datetime'].min()
-    sensors_end = sensors['datetime'].max()
-    keys = df[(df['sensor'] == 'kbd') & (df['datetime'].between(sensors_start, sensors_end))]
-    print("done")
-    return df, sensors, keys
+typeable = list(set(typeable))
 
-def main():
-    df, sensors, keys = preprocess()
-    text_y_val = sensors['value'].max()
-
-    # Of those keys under coverage, find the most pressed one
-    print(f"Coverage is: {COVERAGE}")
-    covered = keys[keys['value'].isin(COVERAGE)]
-    print("Keys ranked by number of key presses")
-    print(covered['value'].value_counts())
-
-    # TODO: Make the lines transparent, and auto-save
-    keys_most_pressed = covered['value'].value_counts().index
-    most_pressed = keys_most_pressed[0]
-    for most_pressed in covered['value'].value_counts().index:
-        print(f"Adjusting data to just show timedelta before and after the '{most_pressed}' key was pressed...", end="")
-        times = covered.loc[covered['value'] == most_pressed, 'datetime']
-        offset = pd.DataFrame()
-        micros = 500_000
-        for time in times:
-            tmp = df.copy()
-            tmp['datetime'] -= time
-            tmp = tmp[np.abs(tmp['datetime']) < datetime.timedelta(microseconds=micros)]
-            tmp['offset'] = time
-            offset = offset.append(tmp)
-
-        sensors_offset = offset[offset['sensor'] != 'kbd']
-        sensors_offset['value'] = pd.to_numeric(sensors_offset['value'])
-        keys_offset = offset[(offset['sensor'] == 'kbd')]
-        plt.figure()
-        num_sensors = len(sensors_offset['sensor'].unique())
-        print(f"Sensors are: {sensors_offset['sensor'].unique()} ({num_sensors})")
-        sensors_offset['datetime'] = pd.to_numeric(sensors_offset['datetime'])
-        g = sns.FacetGrid(
-            data=sensors_offset,
-            col='sensor',
-            col_order=SENSOR_ORDER,
-            hue='offset',
-            col_wrap=1,
-            sharey=False,
-            aspect=2
-        )
-        g.map(
-            sns.lineplot,
-            'datetime', 
-            'value',
-            estimator=None,
-            alpha=0.5
-        )
-        g.set_titles(col_template="Sensor '{col_name}', " + f"{micros//1000}ms before and after '{most_pressed}' was pressed")
-        g.set_xlabels("Time offset (100ms)")
-        g.set_ylabels("Sensor Reading")
-        # plt.text(x=0, y=sensors_offset['value'].max(), s=f'"{most_pressed}"', alpha=0.5)
-        # plt.axvline(x=0, alpha=0.5, c='black', linewidth=1)
-
-        # Finally, show the plot
-        plt.savefig(f"plots/{most_pressed}_{micros//1000}ms_portrait.png", dpi=200)
-        
-        print("saved")
-    print("done")
+# Load in the keys and sensors datasets
+keys = pd.read_pickle('keys_2021-09-29.pkl').sort_values('datetime')
+keys = keys[keys.value.isin(typeable)]
+sensors = pd.read_pickle('sensors_2021-09-29.pkl').sort_values('datetime')
+# Take only the subset of sensor readings occuring in the instant a key
+# was pressed
+print("using kbd instead of keyboard")
+sub_keys = keys.loc[keys.sensor=='kbd', ['datetime', 'value']]
+sub_sens = sensors[sensors.datetime.isin(sub_keys.datetime)]
+X_df = sub_sens.pivot(index='datetime', columns='sensor', values='value') 
+y_df = sub_keys.set_index('datetime')
+# Replace " " with "[space]" for clarity
+y_df.loc[y_df.value==' ', 'value'] = "[space]"
 
 
+# ----------------------------------------------------
+# Plot a polar plot for every frequently occurring key
+# TODO: groupby each key and then normalise, so that
+# you can see when a measurement is out of normal
+# TODO: Instead of plotting every point, just plot 
+# the mean
+# ----------------------------------------------------
+df = pd.concat([y_df, X_df], axis=1)
+df.rename(columns={'value':'key'}, inplace=True)
+# Convert df from wide to long format
+values = df.columns.to_list()
+values.remove('key')
+# Rename the value column because melt doesn't work well with it.
+df = df.melt(id_vars=['key'], value_vars=values, ignore_index=False).reset_index()
+common_keys = df.value_counts('key').head(20).index.to_list()
+df = df[df.key.isin(common_keys)]
+indexes = [int(s) for s in params.get('sensors-in-use') if s != '0']
+ticklabels = pd.Series(params.get('index-to-name').values())[indexes]
+# reverse the labels to go from index to pinky, left to right
+ticklabels = ticklabels[::-1]
+mpl.rcParams['xtick.labelsize'] = 8
+short_ticklables = [tl.replace("right", "r")
+                      .replace("middle", "m")
+                      .replace("ring", "r")
+                      .replace("pinky", "p")
+                      .replace("index", "i") 
+                      .replace("-", "") for tl in ticklabels]
+# Convert from variable to theta to aid with plotting
+num_variables = len(df.variable.unique())
+per_segment = 1 * np.pi / num_variables
+df['theta'] = df['variable'].apply(lambda x: np.where(ticklabels == x)[0][0] * per_segment + per_segment * 0.5)
+# Visualisation tweaks
+g = sns.FacetGrid(df, col="key", hue="key", col_wrap=5,
+                  subplot_kws=dict(projection='polar'),
+                  sharex=False, sharey=False, despine=False)
+g.map(sns.scatterplot, "theta", "value")
+for ax in g.axes:
+    ax.set_thetamin(0)
+    ax.set_thetamax(180)
 
+g.set(
+    xticks=[i*per_segment + 0.5*per_segment for i in range(num_variables)],
+    xticklabels=short_ticklables, 
+    yticklabels=[])
+g.set_titles(col_template="{col_name}")
+g.set_axis_labels("", "")
+plt.tight_layout()
+plt.show()
 
-if __name__ == "__main__":
-    main()
-    print("Program Complete")
 

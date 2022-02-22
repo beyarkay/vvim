@@ -31,6 +31,7 @@ SENSOR_ORDER = ["right-index-1",
     "right-pinky-1",
     "right-pinky-2",
 ]
+print("using kbd instead of keyboard")
 SENSOR_DESCRIPTIONS = { 0: "kbd",
     1: "right-thumb-3",
     2: "right-index-1",
@@ -44,7 +45,8 @@ SENSOR_DESCRIPTIONS = { 0: "kbd",
     10: "right-ring-3",
     11: "right-pinky-1",
     12: "right-pinky-2",
-    13: "right-pinky-3"}
+    13: "right-pinky-3"
+}
 def preprocess():
     print("Preprocessing data from sorted.log")
     # Read in data from tsv
@@ -61,19 +63,23 @@ def preprocess():
     # Describe the df so far
     print(df.describe(datetime_is_numeric=True))
     # Store the key presses separately from the sensor value readings
+    print("using kbd instead of keyboard")
     sensors = df[df['sensor'] != 'kbd']
     # The sensor's values are all numerical data readings
     sensors['value'] = pd.to_numeric(sensors['value'])
     # Only keep keypresses that we've got sensor data for
     sensors_start = sensors['datetime'].min()
     sensors_end = sensors['datetime'].max()
+    print("using kbd instead of keyboard")
     keys = df[(df['sensor'] == 'kbd') & (df['datetime'].between(sensors_start, sensors_end))]
     print("done")
     return df, sensors, keys
 
 def main():
     df, sensors, keys = preprocess()
-    def plt_keys(row): plt.text(x=row['datetime'], y=sensors_in_range['value'].max(), s=f"'{row['value']}'", alpha=0.5); plt.axvline(x=row['datetime'], alpha=0.5, c='black', linewidth=1)
+    def plt_keys(row): 
+        plt.text(x=row['datetime'], y=sensors_in_range['value'].max(), s=f"'{row['value']}'", alpha=0.5);
+        plt.axvline(x=row['datetime'], alpha=0.5, c='black', linewidth=1)
 
     if len(sys.argv) == 1:
         print("A timestamp needs to be provided. For example:")

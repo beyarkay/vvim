@@ -1,120 +1,142 @@
 print("Imports...", end="")
-import seaborn as sns
-sns.set()
+import datetime
+import csv
+import numpy as np
+import json
 import matplotlib.pyplot as plt
 import pandas as pd
-import datetime
+import seaborn as sns
+import sys
+sns.set()
 pd.set_option('display.max_columns', None)
 print("done")
 
-# These are the characters actually covered by the sensors
-# Finger notation is that as for piano. 5 is pinky, though to 1 for thumb
-r1 = [' ']
-r2 = ["j", "m", "n", "b", "h", "y"]
-r3 = [ "k", "y", "u", "i", "<", "(", "[", "*", "8", "(", "9"]
-r4 = ["l", ":", "[del]", "o", "p", ">", ")", "]", "_", ")", "0", "-", "+", "=",
-        ",", ".", "6", "^", "7", "&"]
-r5 = [";", ":", "'", '"', "[return]", "/", "?", "\\", "|", "{", "}",
-        "[right]", "[left]", "[up]", "[right]"]
-# uppercase = [c.upper() for c in r2 + r3 + r4 + r5]
-COVERAGE = list(set(r2 + r3 + r4 + r5))
+with open('params.json', 'r') as f:
+    params = json.load(f)
 
-# Note that the arduino is zero indexed, but the python script has to be
-# one-indexed as the zero-th 'sensor' is the string indicating which key was
-# pressed
-SENSORS_IN_USE = ["0", "2", "3", "5", "6", "8", "9", "11", "12"]
-SENSOR_ORDER = ["right-index-1",
-    "right-index-2",
-    "right-middle-1",
-    "right-middle-2",
-    "right-ring-1",
-    "right-ring-2",
-    "right-pinky-1",
-    "right-pinky-2",
-]
-SENSOR_DESCRIPTIONS = {
-    0: "kbd",
-    1: "right-thumb-3",
-    2: "right-index-1",
-    3: "right-index-2",
-    4: "right-index-3",
-    5: "right-middle-1",
-    6: "right-middle-2",
-    7: "right-middle-3",
-    8: "right-ring-1",
-    9: "right-ring-2",
-    10: "right-ring-3",
-    11: "right-pinky-1",
-    12: "right-pinky-2",
-    13: "right-pinky-3",
-}
+typeable = []
+for _, v in params.get('fingers-to-keys').items():
+    typeable.extend(v)
+
+typeable = list(set(typeable))
 
 print("Preprocessing data from sorted.log")
-# Read in data from tsv
-df = pd.read_csv("sorted.log", "\t", names=['micros', 'sensor', 'value'])    
-
-# Convert micros since epoch to datetime, 
+# -------------------------------------------
+# Read in and clean up the original dataframe
+# -------------------------------------------
+# Read in data from tsv. Use python engine because it's more feature complete
+df = pd.read_csv("sorted.log", "\t", names=['micros', 'sensor', 'value'], quoting=csv.QUOTE_NONE)
+print("Dataframe read in successfully")
+# Convert micros since epoch to datetime,
 df['datetime'] = pd.to_datetime(df['micros'], unit='us')
 # Remove the irrelevant micros column
 del df['micros']
-# df['sensor'] = pd.to_numeric(df['sensor'])
-
 # Drop all the sensors we're not using
-df = df[df['sensor'].isin(SENSORS_IN_USE)]
+df = df[df['sensor'].isin(params.get('sensors-in-use'))]
 # Rename the sensors from indices to names
-df[['sensor']] = df[['sensor']].replace(to_replace=SENSOR_DESCRIPTIONS)
+replacers = {int(k): v for k, v in params.get('index-to-name').items()}
+df[['sensor']] = df[['sensor']].replace(to_replace=replacers)
+
+# -------------------------------
+# Calculate the Sensors Dataframe
+# -------------------------------
+print("Calculating the Sensors Dataframe")
 # Store the key presses separately from the sensor value readings
-sensors = df.loc[df['sensor'] != 'kbd']
+sensors = df.loc[df['sensor'] != 'keyboard']
 # The sensor's values are all numerical data readings
 sensors.loc[:, 'value'] = pd.to_numeric(sensors.loc[:, 'value'])
-# Only keep keypresses that we've got sensor data for
-sensors_start = sensors['datetime'].min()
-sensors_end = sensors['datetime'].max()
-keys = df[(df['sensor'] == 'kbd') & (df['datetime'].between(sensors_start, sensors_end))]
-# Lower-case all the values because we don't know if a shift key has been pressed
-keys.value = keys.value.apply(lambda x: x.lower())
-
 # Remove outliers
 l, h = sensors.value.quantile([0.0001, 0.9999])
 sensors = sensors[sensors.value.between(l, h)]
-# sns.lineplot(data=sensors, x='datetime', y='value', hue='sensor') # Plot the full timeline
 
 # resample
-period_size =pd.Timedelta(50, unit="ms") 
-sensors = sensors.groupby('sensor').resample(period_size, on='datetime').median().reset_index()
-keys = keys.set_index('datetime').resample(period_size).first().reset_index()
+period_size = 10 if len(sys.argv) != 2 else int(sys.argv[1])
+period_sizetd = pd.Timedelta(period_size, unit="ms")
+# The data might be spread out over days or weeks which makes resampling for
+# every 10ms very RAM intensive. Rather split up the data by date and resample
+# on the parts
+sensors['date'] = sensors.datetime.dt.date
+gb = sensors.groupby('date')
+sensor_dfs = [gb.get_group(group) for group in gb.groups]
+print("Resampling the sensors dataframe")
+resampled_sensors = []
+for sensor_df in sensor_dfs:
+    resampled_sensors.append(sensor_df.groupby('sensor').resample(period_sizetd, on='datetime').median().reset_index())
 
-value_counts = keys.value_counts('value')
-keys = keys[keys.value.isin(COVERAGE)]
+sensors = pd.concat(resampled_sensors)
 
+# Remove any time points which have no sensor readings.
+sensors = sensors.dropna()
 now_as_iso = datetime.datetime.isoformat(datetime.datetime.now())[:-16]
-keys.to_pickle(f"keys_{now_as_iso}.pkl")
-print("WARNING: Keys typed but not under coverage:")
-print(sorted(list(value_counts[~value_counts.index.isin(COVERAGE)].index)))
-print("Keys Data:")
-print("\tFrequency of key presses (where for the RH)\n")
-print(value_counts[value_counts.index.isin(COVERAGE)])
-print("\n\tDistribution of datetimes\n")
-print(keys['datetime'].describe(datetime_is_numeric=True))
-sensors.to_pickle(f"sensors_{now_as_iso}.pkl")
-print("\n\nSensors Data:")
-print("\tDescribe for each sensor:")
-print(sensors.groupby('sensor')['value'].describe()[['count', 'mean', 'std', 'min', '50%', 'max']])
+sensors_path = f"sensors-{now_as_iso}-{period_size}ms.pkl"
+sensors.to_pickle(f"sensors-{now_as_iso}-{period_size}ms.pkl")
+print(f"Saved sensors as {sensors_path}")
+del sensors
 
-itimes = keys.loc[keys.value == 'i', 'datetime']
-isensors = sensors[sensors.datetime.isin(itimes)]
-print("Making chart...")
-sns.lineplot(data=sensors, x='datetime', y='value', hue='sensor', lw=0.5)
-plt.show()
+# ----------------------------
+# Calculate the keys Dataframe
+# ----------------------------
+print("Calculating the keys dataframe")
+# Get a df with the data
+keys = df.loc[(df['sensor'] == 'keyboard') & (df['value'].isin(typeable))]
 
-Xy = sensors
-# TODO: this is super slow ):
-Xy['key'] = Xy.datetime.apply(lambda x: (keys.loc[keys.datetime==x, 'value'].unique()[0] if (keys.datetime==x).any() else np.NaN))
-freq_keys = Xy['key'].value_counts().index.to_list()[:10]
+# Lower-case all the values because we don't know if a shift key has been pressed
+def fancy_lower(x):
+    """ lowercase _everything_, as though the shift key doesn't exist"""
+    if x.isalpha():
+        return x.lower()
+    if x in params.get('lower-dict').keys():
+        return params.get('lower-dict').get(x)
+    return x
+
+print("Lower casing all the key presses")
+keys.value = keys.value.apply(fancy_lower)
+# The data might be spread out over days or weeks which makes resampling for
+# every 10ms very RAM intensive. Rather split up the data by date and resample
+# on the parts
+keys['date'] = keys.datetime.dt.date
+gb = keys.groupby('date')
+key_dfs = [gb.get_group(group) for group in gb.groups]
+print("Re sampling the keys dataframe")
+resampled_keys = []
+for key_df in key_dfs:
+    resampled_keys.append(key_df.set_index('datetime').resample(period_sizetd).first().reset_index().dropna())
+keys = pd.concat(resampled_keys)
+del keys['date']
+print("Saving the dataframes")
+keys_path = f"keys-{now_as_iso}-{period_size}ms.pkl"
+keys.to_pickle(keys_path)
+print(f"Saved keys as {keys_path}")
+
+# print(f"Total Readings from keyboard: "
+#         + str(df[(df['sensor'] == 'keyboard')].value.notna().sum()))
+# print(f"Total Readings from sensors: ")
+# print(df[df['sensor'] != 'keyboard'].groupby('sensor').count().value)
+
+
+# print("Making chart...")
+# if input("Make chart?"):
+#     sns.lineplot(data=sensors, x='datetime', y='value', hue='sensor', lw=0.5)
+#     def plt_keys(row):
+#         plt.text(
+#                 x=row['datetime'],
+#                 y=sensors['value'].max(),
+#                 s=f"'{row['value']}'",
+#                 alpha=0.5
+#         )
+#         plt.axvline(x=row['datetime'], alpha=0.5, c='black', linewidth=1)
+#
+#     keys.apply(plt_keys, axis='columns')
+#     plt.show()
+
+# Xy = sensors
+# # TODO: this is super slow ):
+# print("Starting slow transformation of the data's datetimes")
+# Xy['key'] = Xy.datetime.apply(lambda x: (keys.loc[keys.datetime==x, 'value'].unique()[0] if (keys.datetime==x).any() else np.NaN))
+# freq_keys = Xy['key'].value_counts().index.to_list()[:10]
 
 # Faceted boxenplot
-g = sns.FacetGrid(Xy[Xy.key.isin(freq_keys)], col='sensor', col_wrap=2)
-g.map(sns.boxplot, 'value', 'key', palette='Set3')
-plt.show()
-print(f"Saved to keys_{now_as_iso}.pkl and sensors_{now_as_iso}.pkl")
+# g = sns.FacetGrid(Xy[Xy.key.isin(freq_keys)], col='sensor', col_wrap=2)
+# g.map(sns.boxplot, 'value', 'key', palette='Set3')
+# plt.show()
 
